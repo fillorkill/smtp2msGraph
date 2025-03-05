@@ -1,0 +1,22 @@
+{
+    "name": "smtp-ms365-relay",
+    "version": "1.0.0",
+    "description": "SMTP server that relays emails through Microsoft 365 Graph API",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js"
+    },
+    "dependencies": {
+        "@azure/identity": "^4.7.0",
+        "@microsoft/microsoft-graph-client": "^3.0.7",
+        "axios": "^1.4.0",
+        "dotenv": "^16.3.1",
+        "ipaddr.js": "^2.2.0",
+        "mailparser": "^3.6.5",
+        "smtp-server": "^3.13.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    }
+}
