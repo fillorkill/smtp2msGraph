@@ -32,7 +32,7 @@ SMTP_PORT=2525
 SMTP_HOST=0.0.0.0
 
 # TLS settings
-TLS_ENABLED=true
+TLS_ENABLED=false
 TLS_CERT_PATH=certs/certificate.crt
 TLS_KEY_PATH=certs/private.key
 

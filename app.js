@@ -15,17 +15,7 @@ dotenv.config();
 
 // Encryption configuration
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex');
-const IV_LENGTH = 16;
 const ALGORITHM = 'aes-256-cbc';
-
-// Encryption functions
-function encrypt(text) {
-  const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(ENCRYPTION_KEY), iv);
-  let encrypted = cipher.update(text);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return iv.toString('hex') + ':' + encrypted.toString('hex');
-}
 
 function decrypt(text) {
   const [ivHex, encryptedHex] = text.split(':');
@@ -162,11 +152,6 @@ try {
   console.log(`Loaded ${Object.keys(users).length} users from ${path.join(__dirname, 'users.json')}`);
 } catch (error) {
   console.error('Error loading users:', error.message);
-  // Create empty users file if it doesn't exist
-  if (error.code === 'ENOENT') {
-    fs.writeFileSync(path.join(__dirname, 'users.json'), JSON.stringify({}, null, 2));
-    console.log('Created empty users.json file');
-  }
 }
 
 // Create SMTP server
@@ -175,7 +160,14 @@ const server = new SMTPServer({
   authOptional: false,
   authMethods: ['PLAIN', 'LOGIN'],
   name: process.env.SMTP_HOST,
-  
+  key: fs.readFileSync(process.env.TLS_KEY_PATH),
+  cert: fs.readFileSync(process.env.TLS_CERT_PATH),
+  starttls: true,
+  tls: {
+    minVersion: 'TLSv1.2',
+    maxVersion: 'TLSv1.3'
+  },
+
   // Connection settings
   socketTimeout: 30000,
   
@@ -248,20 +240,3 @@ const HOST = process.env.SMTP_HOST || '0.0.0.0';
 server.listen(PORT, HOST, () => {
   console.log(`SMTP server running on ${HOST}:${PORT}`);
 });
-
-// Create .env template file if it doesn't exist
-const envTemplatePath = path.join(__dirname, '.env.example');
-const envTemplate = `# Microsoft Graph API credentials
-CLIENT_ID=your_client_id
-CLIENT_SECRET=your_client_secret
-TENANT_ID=your_tenant_id
-
-# SMTP server settings
-SMTP_PORT=2525
-SMTP_HOST=0.0.0.0
-`;
-
-if (!fs.existsSync(envTemplatePath)) {
-  fs.writeFileSync(envTemplatePath, envTemplate);
-  console.log('.env.example file created');
-}
